@@ -17,6 +17,9 @@ import Datasets
 from PIL import ImageOps
 import matplotlib.pyplot as plt
 import time
+import imageio
+import cv2
+import matplotlib.pyplot as plt
 
 #Training setttings
 parser = argparse.ArgumentParser(description='KITTI Depth Completion Task TEST')
@@ -44,6 +47,7 @@ parser.add_argument('--sparse_val', type=float, default=0.0, help="encode sparse
 def main():
     global args
     global dataset
+
     args = parser.parse_args()
 
     torch.backends.cudnn.benchmark = args.cudnn
@@ -91,20 +95,46 @@ def main():
     total_time = []
     with torch.no_grad():
         size = (1216, 352)
-        # TODO: Criar flag para selecionar qual set deve ser processado
         for i, (img, rgb, gt) in tqdm.tqdm(enumerate(zip(dataset.train_paths['lidar_in'],
                                            dataset.train_paths['img'], dataset.train_paths['gt']))):
         # for i, (img, rgb, gt) in tqdm.tqdm(enumerate(zip(dataset.selected_paths['lidar_in'],
         #                                    dataset.selected_paths['img'], dataset.selected_paths['gt']))):
 
             raw_path = os.path.join(img)
-            raw_pil = Image.open(raw_path)
+            # raw_pil = Image.open(raw_path)
+            raw_pil = imageio.imread(raw_path)
+            # raw_shape = raw_pil.shape
+
+            # print()
+            # print(raw_pil.size)
+            # print(raw_pil.shape, raw_pil.dtype)
+            # print(np.min(raw_pil), np.max(raw_pil))
+
+            # raw_pil = cv2.resize(size, Image.BILINEAR)
+            # raw_pil = cv2.resize(raw_pil,size,interpolation=cv2.INTER_AREA)
+
+            # print()
+            # print(raw_pil.size)
+            # print(raw_pil.shape, raw_pil.dtype)
+            # print(np.min(raw_pil), np.max(raw_pil))
+            # input('ok')
+
             gt_path = os.path.join(gt)
-            gt_pil = Image.open(gt_path)
+            # gt_pil = Image.open(gt_path)
+            gt_pil = imageio.imread(gt_path)
+            # gt_shape = gt_pil.size
+            # gt_pil = cv2.resize(gt_pil, size, interpolation=cv2.INTER_AREA)
+
+            # print(gt_pil.size)
+            # print(rgb_pil.shape)
 
             crop = 352-args.crop_h
-            raw_pil_crop = raw_pil.crop((0, crop, 1216, 352))
-            gt_pil_crop = gt_pil.crop((0, crop, 1216, 352))
+            raw_pil_crop = raw_pil[crop:352, 0:1216]
+            gt_pil_crop = gt_pil[crop:352,0:1216]
+            assert raw_pil_crop.shape == (256, 1216)
+
+            # raw_pil_crop = raw_pil.crop((0, crop, 1216, 352))
+            # gt_pil_crop = gt_pil.crop((0, crop, 1216, 352))
 
             raw = depth_read(raw_pil_crop, args.sparse_val)
             raw = to_tensor(raw).float()
@@ -122,8 +152,13 @@ def main():
 
             if args.input_type == 'rgb':
                 rgb_path = os.path.join(rgb)
-                rgb_pil = Image.open(rgb_path)
-                rgb_pil_crop = rgb_pil.crop((0, crop, 1216, 352))
+                # rgb_pil = Image.open(rgb_path)
+                rgb_pil = imageio.imread(rgb_path)
+                # rgb_pil = cv2.resize(rgb_pil, size, interpolation=cv2.INTER_AREA)
+                # print(rgb_pil.shape)
+                # rgb_pil_crop = rgb_pil.crop((0, crop, 1216, 352))
+                rgb_pil_crop = rgb_pil[crop:352,0:1216]
+                assert rgb_pil_crop.shape == (256, 1216, 3)
                 rgb = to_tensor(rgb_pil_crop).float()
                 rgb = torch.unsqueeze(rgb, 0).cuda()
                 if not args.normal:
@@ -152,7 +187,13 @@ def main():
                 output[:, 0:crop] = output[:, crop].repeat(crop, 1)
 
             pil_img = to_pil(output.int())
-            assert pil_img.size == (1216, 352) # TODO: Esta dimensão deveria ser a dimensão original da imagem.
+            pil_img = pil_img.resize((1242, 375), Image.BILINEAR)
+            assert pil_img.size == (1242, 375)
+
+            # plt.figure(1)
+            # plt.imshow(np.asarray(pil_img))
+            # plt.show()
+
             pil_img.save(os.path.join(save_root, os.path.basename(img)))
     print('average_time: ', sum(total_time[100:])/(len(total_time[100:])))
     print('num imgs: ', i + 1)
