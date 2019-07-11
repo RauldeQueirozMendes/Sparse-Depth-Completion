@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
+import glob
+import os
+import sys
+
 import torch
 import torchvision.transforms as transforms
-import os, sys
-from PIL import Image
-import glob
 import tqdm
+from PIL import Image
+
+from Utils.utils import str2bool,depth_read
+import Models
+import Datasets
+import time
+import imageio
+
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 cwd = os.getcwd()
 print(cwd)
-import numpy as np
-from Utils.utils import str2bool, AverageMeter, depth_read 
-import Models
-import Datasets
-from PIL import ImageOps
-import matplotlib.pyplot as plt
-import time
-import imageio
-import cv2
-import matplotlib.pyplot as plt
 
 #Training setttings
 parser = argparse.ArgumentParser(description='KITTI Depth Completion Task TEST')
