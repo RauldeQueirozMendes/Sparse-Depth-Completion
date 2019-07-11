@@ -88,8 +88,8 @@ class Kitti_preprocessing(object):
         return files
 
     def prepare_dataset(self):
-        path_to_val_sel = 'depth_selection/val_selection_cropped'
-        path_to_test = 'depth_selection/test_depth_completion_anonymous'
+        path_to_val_sel = 'val_selection_cropped' #TODO: depth_selection/val_selection_cropped
+        path_to_test = 'test_depth_completion_anonymous' #TODO: depth_selection/test_depth_completion_anonymous
         self.get_paths()
         self.selected_paths['lidar_in'] = self.get_selected_paths(os.path.join(path_to_val_sel, 'velodyne_raw'))
         self.selected_paths['gt'] = self.get_selected_paths(os.path.join(path_to_val_sel, 'groundtruth_depth'))
@@ -131,12 +131,14 @@ if __name__ == '__main__':
     from PIL import Image
     rgb_im2png = True
     calc_params = False
-    datapath = '/esat/pyrite/wvangans/Datasets/KITTI/Data'
+    # datapath = '/esat/pyrite/wvangans/Datasets/KITTI/Data'
+    # datapath = '/media/olorin/Documentos/datasets/kitti/raw_data_clean' #TODO:'/esat/pyrite/wvangans/Datasets/KITTI/Data'
+    datapath = '/media/olorin/Documentos/datasets/kitti/depth/depth_prediction/data/'
     dataset = Kitti_preprocessing(datapath, input_type='rgb')
     dataset.prepare_dataset()
     if rgb_im2png:
-        destination_train = '/usr/data/tmp/kitti/Rgb/train'
-        destination_valid = '/usr/data/tmp/kitti/Rgb/valid'
+        destination_train = '/media/olorin/Documentos/raul/train' #TODO:'/usr/data/tmp/kitti/Rgb/train'
+        destination_valid = '/media/olorin/Documentos/raul/valid' #TODO:'/usr/data/tmp/kitti/Rgb/valid'
         dataset.convert_png_to_rgb(dataset.train_paths['img'], destination_train)
         dataset.convert_png_to_rgb(dataset.val_paths['img'], destination_valid)
     if calc_params:

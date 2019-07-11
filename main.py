@@ -239,7 +239,7 @@ def main():
                     continue
             print('Successfully loaded pretrained model')
         else:
-            check = torch.load('external_mod.pth.tar')
+            check = torch.load('/media/olorin/Documentos/raul/Sparse-Depth-Completion-master_raul/Saved/model_best_epoch.pth.tar')
             lowest_loss_load = check['loss']
             target_state = model.state_dict()
             for name, val in check['state_dict'].items():
