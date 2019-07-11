@@ -10,15 +10,14 @@ import torchvision.transforms as transforms
 import tqdm
 from PIL import Image
 
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+cwd = os.getcwd()
+print(cwd)
 from Utils.utils import str2bool,depth_read
 import Models
 import Datasets
 import time
 import imageio
-
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-cwd = os.getcwd()
-print(cwd)
 
 #Training setttings
 parser = argparse.ArgumentParser(description='KITTI Depth Completion Task TEST')
